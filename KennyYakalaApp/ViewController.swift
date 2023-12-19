@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     var counter = 0
     var kennyArray = [UIImageView]()
     var hideTimer = Timer()
+    var highScore = 0
     
     @IBOutlet weak var lblTimer: UILabel!
     @IBOutlet weak var lblScore: UILabel!
@@ -31,7 +32,23 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        
         lblScore.text = "Score \(score)"
+        
+        //highScore check
+        
+        let storedHighScore = UserDefaults.standard.object(forKey: "highScore")
+        
+        if storedHighScore == nil {
+            highScore = 0
+            lblHighScore.text = "HighScore: \(highScore)"
+        }
+        
+        if let newScore = storedHighScore as? Int{
+            highScore = newScore
+            lblHighScore.text = "HighScore \(highScore)"
+        }
         
         imgKenny1.isUserInteractionEnabled = true
         imgKenny2.isUserInteractionEnabled = true
@@ -103,10 +120,27 @@ class ViewController: UIViewController {
             timer.invalidate()
             hideTimer.invalidate()
             
+            for kenny in kennyArray{
+                kenny.isHidden = true
+            }
+            if self.score > self.highScore{
+                self.highScore = self.score
+                lblHighScore.text = "HighScore: \(self.highScore)"
+                UserDefaults.standard.set(self.highScore, forKey: "highScore")
+            }
+            
+            
             let alert = UIAlertController(title: "Time's up", message: "Do you want to play again", preferredStyle: UIAlertController.Style.alert)
             
             let okbutton = UIAlertAction(title: "ok", style: UIAlertAction.Style.cancel, handler: nil)
             let replayButton = UIAlertAction(title: "REPLAY", style: UIAlertAction.Style.default) { UIAlertAction in
+                self.score = 0
+                self.lblScore.text = "Score: \(self.score)"
+                self.counter = 10
+                self.lblTimer.text = String(self.counter)
+                
+                self.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.CountDown), userInfo: nil, repeats: true)
+                self.hideTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.hideKenny), userInfo: nil, repeats: true)
                 
             }
             
